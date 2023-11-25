@@ -13,12 +13,7 @@ jobs:
 
       - name: Generate OpenAI response
         run: |
-          ISSUE_TITLE="Issue Title: ${{ steps.issue_info.outputs.title }}"
-          ISSUE_NUMBER="Issue Number: ${{ steps.issue_info.outputs.number }}"
-          ISSUE_BODY="Issue Body: ${{ steps.issue_info.outputs.body }}"
-          
-
-          PROMPT="issue title: $ISSUE_TITLE\nissue number: $ISSUE_NUMBER\nISSUE_BODY=$ISSUE_BODY"
+          PROMPT="${ISSUE_TITLE} (Issue Number: ${ISSUE_NUMBER}, Body: ${ISSUE_BODY})"
           echo "$PROMPT"
           RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
               -H "Content-Type: application/json" \
@@ -55,4 +50,6 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.number }}
