@@ -1,11 +1,19 @@
-# Environment Variables for Docker Development Setup
+## Non-Secret Environment Variables
 
-This document outlines the environment variables available to the apimesh
+```yaml
+- GitHub Username: m-c-frank
+- Repository Name: apimesh
+```
 
-## GitHub Details
+## OpenAI API Key in GitHub Actions
 
-- **GitHub Username:** `m-c-frank`
-- **Repository Name:** `apimesh`
+To access OpenAI in GitHub Actions, store the API key as a secret and reference it in your workflows:
 
-These environment variables are used to configure the Docker container for development purposes, ensuring it is aligned with the specific GitHub repository and user details.
+### GitHub Actions Workflow Snippet
 
+```yaml
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+```
+
+Add the above snippet to your GitHub Actions workflow file to use the OpenAI API key.
