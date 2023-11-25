@@ -23,14 +23,26 @@ jobs:
           ISSUE_TITLE_JSON=$(jq -aRs . <<< "$ISSUE_TITLE")
           ISSUE_BODY_JSON=$(jq -aRs . <<< "$ISSUE_BODY")
 
+          # Debugging: Print the JSON variables
+          echo "Issue Title JSON: $ISSUE_TITLE_JSON"
+          echo "Issue Body JSON: $ISSUE_BODY_JSON"
+
+          # Check if variables are empty and set them to null JSON value if they are
+          if [ -z "$ISSUE_TITLE_JSON" ]; then
+            ISSUE_TITLE_JSON="null"
+          fi
+          if [ -z "$ISSUE_BODY_JSON" ]; then
+            ISSUE_BODY_JSON="null"
+          fi
+
           # Formulate the prompt
           PROMPT=$(jq -n \
-                --arg model "gpt-3.5-turbo" \
-                --arg taskContent "Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity." \
-                --argjson issueTitle $ISSUE_TITLE_JSON \
-                --arg issueNumber "$ISSUE_NUMBER" \
-                --argjson issueBody $ISSUE_BODY_JSON \
-                '{model: $model, messages: [{role: "system", content: $taskContent}, {role: "user", content: ($issueTitle + " (Issue Number: " + $issueNumber + ", Body: " + $issueBody + ")")}]}' )
+              --arg model "gpt-3.5-turbo" \
+              --arg taskContent "Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity." \
+              --argjson issueTitle $ISSUE_TITLE_JSON \
+              --arg issueNumber "$ISSUE_NUMBER" \
+              --argjson issueBody $ISSUE_BODY_JSON \
+              '{model: $model, messages: [{role: "system", content: $taskContent}, {role: "user", content: ($issueTitle + " (Issue Number: " + $issueNumber + ", Body: " + $issueBody + ")")}]}' )
 
           echo "Prompt: $PROMPT"
 
