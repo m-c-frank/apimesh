@@ -27,10 +27,10 @@ jobs:
                   },
                   {
                     "role": "user",
-                    "content": "'$PROMPT'"
+                    "content": "$PROMPT"
                   },
                 ]
-              }
+              }'
           )
           echo "$RESPONSE"
 
@@ -52,4 +52,4 @@ jobs:
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          ISSUE_BODY: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
