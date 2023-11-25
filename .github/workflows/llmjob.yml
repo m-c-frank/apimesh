@@ -32,7 +32,7 @@ jobs:
                   },
                   {
                     "role": "user",
-                    "content": "$PROMPT"
+                    "content": "'$PROMPT'"
                   },
                 ]
               }
