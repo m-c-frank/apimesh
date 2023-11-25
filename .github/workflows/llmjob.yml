@@ -13,26 +13,27 @@ jobs:
 
       - name: Prepare Prompt
         run: |
-          echo "PROMPT=Issue Title: $(jq -r .issue.title < $GITHUB_EVENT_PATH)\nIssue Description: $(jq -r .issue.body < $GITHUB_EVENT_PATH)\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue." >> $GITHUB_ENV
+          ISSUE_TITLE=$(jq -r .issue.title < $GITHUB_EVENT_PATH)
+          ISSUE_BODY=$(jq -r .issue.body < $GITHUB_EVENT_PATH)
+          PROMPT="Issue Title: $ISSUE_TITLE\nIssue Description: $ISSUE_BODY\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."
+          echo "PROMPT=$PROMPT" >> $GITHUB_ENV
 
       - name: Call OpenAI API
         run: |
           RESPONSE=$(curl -s "https://api.openai.com/v1/chat/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -d '{
-                "model": "gpt-3.5-turbo",
-                "messages": [{"role": "user", "content": "$PROMPT"}],
-                "temperature": 0.7
-              }')
+            -d "$(jq -n --arg prompt "$PROMPT" '{model: "gpt-3.5-turbo", messages: [{role: "user", content: $prompt}], temperature: 0.7}')")
           echo "RESPONSE=$RESPONSE" >> $GITHUB_ENV
+          ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
+          echo "ANSWER=$ANSWER" >> $GITHUB_ENV
 
       - name: Log Response
         run: echo "$RESPONSE"
 
       - name: Create README
         run: |
-          echo "${{ steps.openai-call.outputs.answer }}" > SOLUTIONS_README.md
+          echo "$ANSWER" > SOLUTIONS_README.md
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
           git add SOLUTIONS_README.md
