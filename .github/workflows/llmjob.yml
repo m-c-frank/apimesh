@@ -12,26 +12,23 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare Prompt
-        id: prepare-prompt
         run: |
-          ISSUE_TITLE=$(jq -r .issue.title < $GITHUB_EVENT_PATH)
-          ISSUE_BODY=$(jq -r .issue.body < $GITHUB_EVENT_PATH)
-          PROMPT="Issue Title: $ISSUE_TITLE\nIssue Description: $ISSUE_BODY\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."
-          echo "::set-output name=prompt::$PROMPT"
+          echo "PROMPT=Issue Title: $(jq -r .issue.title < $GITHUB_EVENT_PATH)\nIssue Description: $(jq -r .issue.body < $GITHUB_EVENT_PATH)\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue." >> $GITHUB_ENV
 
       - name: Call OpenAI API
-        id: openai-call
         run: |
           RESPONSE=$(curl -s "https://api.openai.com/v1/chat/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
             -d '{
-                 "model": "gpt-3.5-turbo",
-                 "messages": [{"role": "user", "content": "${{ steps.prepare-prompt.outputs.prompt }}"}],
-                 "temperature": 0.7
-               }')
-          ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
-          echo "::set-output name=answer::$ANSWER"
+                "model": "gpt-3.5-turbo",
+                "messages": [{"role": "user", "content": "$PROMPT"}],
+                "temperature": 0.7
+              }')
+          echo "RESPONSE=$RESPONSE" >> $GITHUB_ENV
+
+      - name: Log Response
+        run: echo "$RESPONSE"
 
       - name: Create README
         run: |
