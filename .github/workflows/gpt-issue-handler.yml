@@ -1,0 +1,31 @@
+name: GPT Issue Response
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  process_issue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract Issue Text
+      id: extract
+      run: echo "Issue Text: \$(gh issue view \${{ github.event.issue.number }} --json body -q '.body')" >> \$GITHUB_ENV
+
+    - name: Call OpenAI API
+      id: openai
+      run: |
+        RESPONSE=\$(curl -X POST 'https://api.openai.com/v1/engines/davinci-codex/completions' \
+          -H 'Content-Type: application/json' \
+          -H 'Authorization: Bearer \${{ secrets.OPENAI_API_KEY }}' \
+          -d '{
+            "prompt": "Summarize this issue: \${{ env.Issue_Text }}",
+            "max_tokens": 1024
+          }')
+        echo "Response: \$RESPONSE" >> \$GITHUB_ENV
+
+    - name: Format Response
+      run: echo "Formatted Response: \${RESPONSE}" >> \$GITHUB_ENV
