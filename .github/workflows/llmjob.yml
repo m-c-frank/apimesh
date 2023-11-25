@@ -24,7 +24,7 @@ jobs:
           echo "$ANSWER" > SOLUTIONS_README.md
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
-          git checkout llmjob
+          git checkout -b llmjob
           git add SOLUTIONS_README.md
           git commit -m 'Add generated solutions README'
           git push --set-upstream origin llmjob -u $GH_PAT
