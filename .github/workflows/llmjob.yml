@@ -24,7 +24,14 @@ jobs:
           ISSUE_BODY_JSON=$(jq -aRs . <<< "$ISSUE_BODY")
 
           # Formulate the prompt
-          PROMPT="{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"system\", \"content\": \"Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity.\"}, {\"role\": \"user\", \"content\": \"${ISSUE_TITLE_JSON//\"/\\\"} (Issue Number: ${ISSUE_NUMBER}, Body: ${ISSUE_BODY_JSON//\"/\\\"})\"}]}"
+          PROMPT=$(jq -n \
+                --arg model "gpt-3.5-turbo" \
+                --arg taskContent "Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity." \
+                --argjson issueTitle $ISSUE_TITLE_JSON \
+                --arg issueNumber "$ISSUE_NUMBER" \
+                --argjson issueBody $ISSUE_BODY_JSON \
+                '{model: $model, messages: [{role: "system", content: $taskContent}, {role: "user", content: ($issueTitle + " (Issue Number: " + $issueNumber + ", Body: " + $issueBody + ")")}]}' )
+
           echo "Prompt: $PROMPT"
 
           # Send a request to the OpenAI API
