@@ -19,18 +19,21 @@ jobs:
             -H "Authorization: Bearer $API_KEY" \
             -d "{\"model\": \"gpt-3.5-turbo\", \"prompt\": \"$PROMPT\", \"max_tokens\": 150, \"temperature\": 0.7}")
 
+          echo "$RESPONSE"
+
           ANSWER=$(echo $RESPONSE | jq -r .choices[0].message.content)
           
           echo "$ANSWER"
 
           echo "$ANSWER" > SOLUTIONS_README.md
+          gh auth login --with-token $GH_PAT 
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
           git checkout -b llmjob
           git push origin llmjob
           git add SOLUTIONS_README.md
           git commit -m 'Add generated solutions README'
-          git push --set-upstream origin llmjob -u $GH_PAT
+          git push --set-upstream origin llmjob
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
