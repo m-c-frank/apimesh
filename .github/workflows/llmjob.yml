@@ -39,9 +39,9 @@ jobs:
           PROMPT=$(jq -n \
               --arg model "gpt-3.5-turbo" \
               --arg taskContent "Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity." \
-              --argjson issueTitle $ISSUE_TITLE_JSON \
+              --arg issueTitle $ISSUE_TITLE_JSON \
               --arg issueNumber "$ISSUE_NUMBER" \
-              --argjson issueBody $ISSUE_BODY_JSON \
+              --arg issueBody $ISSUE_BODY_JSON \
               '{model: $model, messages: [{role: "system", content: $taskContent}, {role: "user", content: ($issueTitle + " (Issue Number: " + $issueNumber + ", Body: " + $issueBody + ")")}]}' )
 
           echo "Prompt: $PROMPT"
