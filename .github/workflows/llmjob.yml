@@ -17,11 +17,9 @@ jobs:
           ISSUE_BODY=$(jq -r .issue.body < $GITHUB_EVENT_PATH)
           PROMPT="Issue Title: $ISSUE_TITLE\nIssue Description: $ISSUE_BODY\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."
           echo "PROMPT=$PROMPT" >> $GITHUB_ENV
+
       - name: Generate OpenAI response
         run: |
-          PROMPT="Issue Title: testing the llmjob\nIssue Description: null\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue"
-          API_KEY="YOUR_OPENAI_API_KEY"  # Replace with your actual API key
-
           RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/completions" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $API_KEY" \
