@@ -13,12 +13,30 @@ jobs:
 
       - name: Generate OpenAI response
         run: |
-          PROMPT=$(jq -r '"Issue Title: \(.issue.title)\nIssue Description: \(.issue.body)\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."' < "$GITHUB_EVENT_PATH")
-          RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/completions" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $API_KEY" \
-            -d "{\"model\": \"gpt-3.5-turbo\", \"prompt\": \"$PROMPT\", \"max_tokens\": 150, \"temperature\": 0.7}")
+          ISSUE_TITLE="Issue Title: ${{ steps.issue_info.outputs.title }}"
+          ISSUE_NUMBER="Issue Number: ${{ steps.issue_info.outputs.number }}"
+          ISSUE_BODY="Issue Body: ${{ steps.issue_info.outputs.body }}"
+          
 
+          PROMPT="issue title: $ISSUE_TITLE\nissue number: $ISSUE_NUMBER\nISSUE_BODY=$ISSUE_BODY"
+          echo "$PROMPT"
+          RESPONSE=$(curl https://api.openai.com/v1/chat/completions \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $OPENAI_API_KEY" \
+              -d '{
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                  },
+                  {
+                    "role": "user",
+                    "content": "$PROMPT"
+                  },
+                ]
+              }
+          )
           echo "$RESPONSE"
 
           ANSWER=$(echo $RESPONSE | jq -r .choices[0].message.content)
