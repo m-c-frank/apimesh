@@ -20,15 +20,10 @@ jobs:
 
       - name: Call OpenAI API
         run: |
-          curl https://api.openai.com/v1/chat/completions \
+          RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/completions" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $OPENAI_API_KEY" \
-            -d '{
-               "model": "gpt-3.5-turbo",
-               "messages": [{"role": "user", "content": "$PROMPT"}],
-               "temperature": 0.7
-             }'
-          echo "RESPONSE=$RESPONSE" >> $GITHUB_ENV
+            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+            -d "{\"model\": \"gpt-3.5-turbo\", \"prompt\": \"$PROMPT\", \"max_tokens\": 150, \"temperature\": 0.7}")
           ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
           echo "ANSWER=$ANSWER" >> $GITHUB_ENV
 
