@@ -1,0 +1,44 @@
+name: Process Issue and Generate Solutions
+
+on:
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  generate-solutions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Prepare Prompt
+        id: prepare-prompt
+        run: |
+          ISSUE_TITLE=$(jq -r .issue.title < $GITHUB_EVENT_PATH)
+          ISSUE_BODY=$(jq -r .issue.body < $GITHUB_EVENT_PATH)
+          PROMPT="Issue Title: $ISSUE_TITLE\nIssue Description: $ISSUE_BODY\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."
+          echo "::set-output name=prompt::$PROMPT"
+
+      - name: Call OpenAI API
+        id: openai-call
+        run: |
+          RESPONSE=$(curl -s "https://api.openai.com/v1/chat/completions" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+            -d '{
+                 "model": "gpt-3.5-turbo",
+                 "messages": [{"role": "user", "content": "${{ steps.prepare-prompt.outputs.prompt }}"}],
+                 "temperature": 0.7
+               }')
+          ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
+          echo "::set-output name=answer::$ANSWER"
+
+      - name: Create README
+        run: |
+          echo "${{ steps.openai-call.outputs.answer }}" > SOLUTIONS_README.md
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add SOLUTIONS_README.md
+          git commit -m 'Add generated solutions README'
+          git push
+

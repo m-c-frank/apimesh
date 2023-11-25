@@ -1,0 +1,22 @@
+name: Retrieve File Content
+
+on:
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  fetch-file-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get File Content
+        id: get-content
+        run: |
+          FILE_CONTENT=$(curl -s "https://raw.githubusercontent.com/${{ github.event.issue.body.github_username }}/${{ github.event.issue.body.repository_name }}/main/${{ github.event.issue.body.filename }}")
+          echo "::set-output name=content::$FILE_CONTENT"
+
+      - name: Use File Content
+        run: echo "File Content: ${{ steps.get-content.outputs.content }}"
+
