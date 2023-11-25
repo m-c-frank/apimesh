@@ -17,18 +17,22 @@ jobs:
           ISSUE_BODY=$(jq -r .issue.body < $GITHUB_EVENT_PATH)
           PROMPT="Issue Title: $ISSUE_TITLE\nIssue Description: $ISSUE_BODY\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue."
           echo "PROMPT=$PROMPT" >> $GITHUB_ENV
-
-      - name: Call OpenAI API
+      - name: Generate OpenAI response
         run: |
+          PROMPT="Issue Title: testing the llmjob\nIssue Description: null\nProvide a clear and concise answer in Markdown format, suggesting three to four creative and orthogonal ways to implement or address this issue"
+          API_KEY="YOUR_OPENAI_API_KEY"  # Replace with your actual API key
+
           RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/completions" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+            -H "Authorization: Bearer $API_KEY" \
             -d "{\"model\": \"gpt-3.5-turbo\", \"prompt\": \"$PROMPT\", \"max_tokens\": 150, \"temperature\": 0.7}")
-          ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
-          echo "ANSWER=$ANSWER" >> $GITHUB_ENV
 
-      - name: Log Response
-        run: echo "$RESPONSE"
+          ANSWER=$(echo $RESPONSE | jq -r .choices[0].text)
+          
+          echo "$ANSWER"
+          echo "ANSWER=$ANSWER" >> $GITHUB_ENV
+        env:
+          API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Create README
         run: |
