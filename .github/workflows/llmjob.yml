@@ -27,7 +27,7 @@ jobs:
           RESPONSE=$(curl -s "https://api.openai.com/v1/chat/completions" \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $OPENAI_API_KEY" \
-              -d "{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a helpful assistant.\"}, {\"role\": \"user\", \"content\": \"$PROMPT\"}]}")
+              -d "{\"model\": \"gpt-3.5-turbo\", \"messages\": [{\"role\": \"system\", \"content\": \"Task: Identify five distinct, efficient methods for resolving a specific problem or task. Prompt: 'List five different methods to address [specific issue or task]. Focus on approaches with the fewest steps. Detail the key steps and highlight the efficiency of each method.' Requirement: Responses should offer varied, straightforward solutions. Each method must be uniquely efficient, emphasizing minimalism in steps and process complexity.\"}, {\"role\": \"user\", \"content\": \"$PROMPT\"}]}"
           echo "Response: $RESPONSE"
 
           # Extract the answer
@@ -36,6 +36,8 @@ jobs:
 
           # Write the answer to a markdown file
           echo "$ANSWER" > SOLUTIONS_README.md
+          
+          echo "$GH_PAT" | gh auth login --with-token
 
           # Configure Git
           git config --global user.name 'GitHub Actions Bot'
